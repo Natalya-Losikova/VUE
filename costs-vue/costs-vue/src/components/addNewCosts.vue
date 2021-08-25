@@ -5,24 +5,34 @@
     </button>
     <div v-if="show">
       <input type="text" v-model="date" placeholder="Date" />
-      <input type="text" v-model="Category" placeholder="Category" />
-      <input type="text" v-model="Value" placeholder="Value" />
+      <!-- <input type="text" v-model="category" placeholder="Category" /> -->
+      <select v-model="category" v-if="options">
+        <option class="option" value="" disabled selected hidden>
+          Category
+        </option>
+        <option v-for="option in options" :value="option" :key="option">
+          {{ option }}
+        </option>
+      </select>
+      <input type="number" v-model.number="value" placeholder="Value" />
       <button :class="[$style.btnSave]" @click="onSave">Save</button>
     </div>
   </div>
 </template>
 <script>
+import { mapMutations, mapActions } from "vuex";
 export default {
   name: "addNewCosts",
   data() {
     return {
       show: false,
       date: "",
-      Category: "",
-      Value: "",
+      category: "",
+      value: "",
     };
   },
   computed: {
+    ...mapMutations(["setPaymentListData"]),
     getCurrentDate() {
       const today = new Date();
       const d = today.getDate();
@@ -30,22 +40,26 @@ export default {
       const y = today.getFullYear();
       return `${d}.${m}.${y}`;
     },
-    totalValue() {
-      return 0;
+    options() {
+      return this.$store.getters.getCategories;
     },
   },
   methods: {
+    ...mapActions(["fetchCategoryList"]),
     onSave() {
-      const { Value, Category } = this;
+      const { category, value } = this;
       const data = {
         date: this.date || this.getCurrentDate,
-        Category,
-        Value,
+        category,
+        value,
       };
 
       console.log("emit: addNewPayment", data);
       this.$emit("addNewPayment", data);
     },
+  },
+  created() {
+    this.fetchCategoryList();
   },
 };
 </script>
@@ -65,5 +79,12 @@ export default {
 }
 input {
   padding: 5px 10px;
+}
+select {
+  padding: 5px 10px;
+  color: #7b7b7b;
+}
+option {
+  color: black;
 }
 </style>
